@@ -30,3 +30,5 @@ C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhance
 C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\obj\Debug\net8.0\Api_Enhanced.pdb
 C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\obj\Debug\net8.0\Api_Enhanced.genruntimeconfig.cache
 C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\obj\Debug\net8.0\ref\Api_Enhanced.dll
+C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\obj\Debug\net8.0\Api_Enhanced.sourcelink.json
+C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\bin\Debug\net8.0\Newtonsoft.Json.dll
