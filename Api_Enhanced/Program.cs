@@ -17,7 +17,7 @@ public static class Program
 		builder.Services.AddHttpClient<MyAnimeListService>();
 
 		builder.Services.AddSingleton(provider =>
-			new MyAnimeListService(provider.GetRequiredService<HttpClient>())); // Replace with your actual Client-ID
+			new MyAnimeListService(provider.GetRequiredService<HttpClient>()));
 
 		// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 		builder.Services.AddEndpointsApiExplorer();
