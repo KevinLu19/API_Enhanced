@@ -39,6 +39,41 @@
           }
         }
       },
+      "Selenium.Support/4.22.0": {
+        "type": "package",
+        "dependencies": {
+          "Selenium.WebDriver": "4.22.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/WebDriver.Support.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/WebDriver.Support.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Selenium.WebDriver/4.22.0": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1"
+        },
+        "compile": {
+          "lib/netstandard2.0/WebDriver.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/WebDriver.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Selenium.WebDriver.targets": {}
+        }
+      },
       "Swashbuckle.AspNetCore/6.4.0": {
         "type": "package",
         "dependencies": {
@@ -383,6 +418,40 @@
         "packageIcon.png"
       ]
     },
+    "Selenium.Support/4.22.0": {
+      "sha512": "gRm/h3xC9KQpzKG0vgfOVVEyNngKhvKdnZErV1o5Xf5usL8KXhIbUBe/RDR2QIa4bcK8CxDSoZ0CgYCfXDePFA==",
+      "type": "package",
+      "path": "selenium.support/4.22.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/netstandard2.0/WebDriver.Support.dll",
+        "lib/netstandard2.0/WebDriver.Support.xml",
+        "selenium.support.4.22.0.nupkg.sha512",
+        "selenium.support.nuspec"
+      ]
+    },
+    "Selenium.WebDriver/4.22.0": {
+      "sha512": "t2ZzGjpA85tIfk820howgg4r0bkelA4MiulUdqIcewgKPlznHenp4MczaX0tXXmjbRRTbMcRPA+JfnxFoE47AQ==",
+      "type": "package",
+      "path": "selenium.webdriver/4.22.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "build/Selenium.WebDriver.targets",
+        "buildTransitive/Selenium.WebDriver.targets",
+        "icon.png",
+        "lib/netstandard2.0/WebDriver.dll",
+        "lib/netstandard2.0/WebDriver.xml",
+        "manager/linux/selenium-manager",
+        "manager/macos/selenium-manager",
+        "manager/windows/selenium-manager.exe",
+        "selenium.webdriver.4.22.0.nupkg.sha512",
+        "selenium.webdriver.nuspec"
+      ]
+    },
     "Swashbuckle.AspNetCore/6.4.0": {
       "sha512": "eUBr4TW0up6oKDA5Xwkul289uqSMgY0xGN4pnbOIBqCcN9VKGGaPvHX3vWaG/hvocfGDP+MGzMA0bBBKz2fkmQ==",
       "type": "package",
@@ -468,6 +537,8 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Newtonsoft.Json >= 13.0.3",
+      "Selenium.Support >= 4.22.0",
+      "Selenium.WebDriver >= 4.22.0",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
   },
@@ -478,11 +549,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Kevin\\Desktop\\Programming Project\\CSharp\\repos\\Api_Enhanced\\Api_Enhanced\\Api_Enhanced.csproj",
+      "projectUniqueName": "C:\\Users\\Kevin\\OneDrive\\Desktop\\ProgrammingProject\\CSharp\\Api_Enhanced\\Api_Enhanced\\Api_Enhanced.csproj",
       "projectName": "Api_Enhanced",
-      "projectPath": "C:\\Users\\Kevin\\Desktop\\Programming Project\\CSharp\\repos\\Api_Enhanced\\Api_Enhanced\\Api_Enhanced.csproj",
+      "projectPath": "C:\\Users\\Kevin\\OneDrive\\Desktop\\ProgrammingProject\\CSharp\\Api_Enhanced\\Api_Enhanced\\Api_Enhanced.csproj",
       "packagesPath": "C:\\Users\\Kevin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Kevin\\Desktop\\Programming Project\\CSharp\\repos\\Api_Enhanced\\Api_Enhanced\\obj\\",
+      "outputPath": "C:\\Users\\Kevin\\OneDrive\\Desktop\\ProgrammingProject\\CSharp\\Api_Enhanced\\Api_Enhanced\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -509,11 +580,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -523,6 +589,14 @@
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
+          },
+          "Selenium.Support": {
+            "target": "Package",
+            "version": "[4.22.0, )"
+          },
+          "Selenium.WebDriver": {
+            "target": "Package",
+            "version": "[4.22.0, )"
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
@@ -548,7 +622,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

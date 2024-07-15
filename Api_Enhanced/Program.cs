@@ -15,6 +15,7 @@ public static class Program
 
 		builder.Services.AddControllers();
 		builder.Services.AddHttpClient<MyAnimeListService>();
+		builder.Services.AddTransient<MALActor>();
 
 		builder.Services.AddSingleton(provider =>
 			new MyAnimeListService(provider.GetRequiredService<HttpClient>()));
@@ -44,3 +45,4 @@ public static class Program
 
 	
 }
+  
