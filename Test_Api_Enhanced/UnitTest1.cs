@@ -4,8 +4,8 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using Xunit;
 using Xunit.Abstractions;
+using System.Linq;
 
 namespace Test_Api_Enhanced;
 
@@ -14,7 +14,7 @@ public class TestMALActorScrape : IDisposable
 	private WebDriver _driver;
 	private string _website = "https://myanimelist.net/people.php";
 	private readonly ITestOutputHelper _test_output;
-	private Dictionary<string, string> _anime_character_map = new Dictionary<string, string>();
+	private Dictionary<IWebElement, IWebElement> _anime_character_map = new Dictionary<IWebElement, IWebElement>();
 
 	public TestMALActorScrape(ITestOutputHelper output)
     {
@@ -80,7 +80,7 @@ public class TestMALActorScrape : IDisposable
 			_test_output.WriteLine("----Option selected for most favorites----");
 
 			ResultTable();
-			Thread.Sleep(2000);			// Sleep for 5 seconds.
+			Thread.Sleep(2000);			// Sleep for 2 seconds.
 		}
 		catch (Exception ex) 
 		{
@@ -103,20 +103,53 @@ public class TestMALActorScrape : IDisposable
 
 		// Add anime title and series (tv) onto hashmap. Use this hashmap in order to filter out anime series franchise.
 		// Zip title and tv_series into hashmap.
-		var dict = title.Zip(tv_series, (k, v) => new { k, v })
+		_anime_character_map = title.Zip(tv_series, (k, v) => new { k, v })
 			.ToDictionary(x => x.k, x => x.v);
 
 		// Key: Anime title
 		// Value: Tv series, Speical, etc
-		foreach (var item in dict)
-		{
-			_test_output.WriteLine(item.Key.Text);
-			_test_output.WriteLine("-------------");
-			_test_output.WriteLine(item.Value.Text);
-			_test_output.WriteLine("+++++++++++++");
-		}
+		//foreach (var item in _anime_character_map)
+		//{
+		//	_test_output.WriteLine(item.Key.Text);
+		//	_test_output.WriteLine("-------------");
+		//	_test_output.WriteLine(item.Value.Text);
+		//	_test_output.WriteLine("+++++++++++++");
+		//}
+
+		SingleAnimeFranchise();
 
 		//ReturnOnlyOneCharacterPerAnime(results);
+	}
+
+	// Removes the special, ova, etc from the anime franchise located in the hashmap.
+	// Uses TV as the main source for filtration.
+	public void SingleAnimeFranchise()
+	{
+		// Stores main anime series.
+		List<string> main_anime_series = new List<string>();
+
+		foreach (var item in _anime_character_map)
+		{
+			// Value using key.
+			var anime_tv_franchise = _anime_character_map[item.Key];
+
+			//_test_output.WriteLine(anime_tv_franchise.Text);
+
+			// Checks if value got TV in its string.
+			if (anime_tv_franchise.Text.Contains("TV"))
+			{
+				// Add the key (main anime title name).
+				main_anime_series.Add(item.Key.Text);
+			}
+			
+		}
+
+		// Printing the list.
+		foreach (var items in main_anime_series)
+		{
+			_test_output.WriteLine(items);
+		}
+
 	}
 
 	// Want to also print out to user only 1 character per slot. Don't want to have 10 differnt series
