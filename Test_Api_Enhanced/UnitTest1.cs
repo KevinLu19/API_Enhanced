@@ -1,4 +1,4 @@
-using Api_Enhanced.Services;
+﻿using Api_Enhanced.Services;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using Xunit.Abstractions;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Test_Api_Enhanced;
 
@@ -32,25 +33,25 @@ public class TestMALActorScrape : IDisposable
 	//}
 
 
-	// https://myanimelist.net/people.php?cat=person&q=<lastname%firstname>
-	// So far, found that lastname of "takahashi" gives multiple results.
-	[Theory]
-	//[InlineData("Takahashi Rie")]
-	[InlineData("Hanazawa Kana")]
-	[InlineData("Toyosaki Aki")]
-	public void SearchActorViaSearchBar(string name)
-	{
-		var search_bar = _driver.FindElement(By.XPath("//input[@id='vaq']"));
-		search_bar.Clear();
-		search_bar.SendKeys(name);
+	//// https://myanimelist.net/people.php?cat=person&q=<lastname%firstname>
+	//// So far, found that lastname of "takahashi" gives multiple results.
+	//[Theory]
+	////[InlineData("Takahashi Rie")]
+	//[InlineData("Hanazawa Kana")]
+	//[InlineData("Toyosaki Aki")]
+	//public void SearchActorViaSearchBar(string name)
+	//{
+	//	var search_bar = _driver.FindElement(By.XPath("//input[@id='vaq']"));
+	//	search_bar.Clear();
+	//	search_bar.SendKeys(name);
 
-		var search_enter_btn = _driver.FindElement(By.XPath("//button[@class='inputButton']"));
-		search_enter_btn.Click();
+	//	var search_enter_btn = _driver.FindElement(By.XPath("//button[@class='inputButton']"));
+	//	search_enter_btn.Click();
 
-		// Need to figure out what to do with actor/actresses with multiple results.
+	//	// Need to figure out what to do with actor/actresses with multiple results.
 
-		Assert.NotNull(search_bar);
-	}
+	//	Assert.NotNull(search_bar);
+	//}
 
 	[Fact]
 	public void SearchViaLink()
@@ -128,6 +129,7 @@ public class TestMALActorScrape : IDisposable
 		// Stores main anime series.
 		List<string> main_anime_series = new List<string>();
 
+		// Sort by TV series.
 		foreach (var item in _anime_character_map)
 		{
 			// Value using key.
@@ -144,27 +146,60 @@ public class TestMALActorScrape : IDisposable
 			
 		}
 
-		// Printing the list.
-		foreach (var items in main_anime_series)
-		{
-			_test_output.WriteLine(items);
-		}
+		//// Printing the list.
+		//foreach (var items in main_anime_series)
+		//{
+		//	_test_output.WriteLine(items);
+		//}
 
+
+		List<string> keywords_filtration = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "second", "third", "season", ":", "recap", "!!" };
+		var main_list = FilterMainAnime(main_anime_series, keywords_filtration);
+
+		// Sort list by anime. 
+		// Remove any numbers, letters, etc in the list.
+		// Only show one anime franchise in the series.
+		for (int i = 0; i < main_list.Count; i++) 
+		{
+			_test_output.WriteLine(main_list[i]);			
+		}
 	}
 
-	// Want to also print out to user only 1 character per slot. Don't want to have 10 differnt series
-	// of anime of the same character.
-	public void ReturnOnlyOneCharacterPerAnime(ReadOnlyCollection<IWebElement> data_results)
+	// Grabs only the main series for the anime and return it back to the SingleAnimeFranchise().
+	public List<string> FilterMainAnime(List<string> anime_list, List<string> keywords)
 	{
-		var character_name = "";
-		var anime_title = "";
-		
+		var anime_hash_set = new HashSet<string>();
+		var main_list = new List<string>();
 
-		foreach (var item in data_results)
+		
+		foreach (var item in anime_list)
 		{
-			_test_output.WriteLine(item.Text);
+			if (!ContainsKeyword(item, keywords))
+			{
+				if (!anime_hash_set.Contains(item))
+				{
+					anime_hash_set.Add(item);
+					main_list.Add(item);
+				}
+			}
+
 		}
 
+		return main_list;
+	}
+
+	// Check if list contains any of the keywords
+	public bool ContainsKeyword(string anime, List<string> keywords)
+	{
+		foreach (var keyword in keywords)
+		{
+			if (anime.ToLower().Contains(keyword.ToLower()))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public void Dispose()
