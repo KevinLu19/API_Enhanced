@@ -7,6 +7,8 @@ using System.ComponentModel.DataAnnotations;
 using Xunit.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Security.AccessControl;
+using System.ComponentModel;
 
 namespace Test_Api_Enhanced;
 
@@ -56,8 +58,12 @@ public class TestMALActorScrape : IDisposable
 	[Fact]
 	public void SearchViaLink()
 	{
-		var firstname = "hanazawa";
-		var lastname = "kana";
+		//var firstname = "hanazawa";
+		//var lastname = "kana";
+		var firstname = "atsumi";
+		var lastname = "tanezaki";
+		
+
 
 		var url = $"https://myanimelist.net/people.php?cat=person&q={lastname}%{firstname}";
 
@@ -146,13 +152,6 @@ public class TestMALActorScrape : IDisposable
 			
 		}
 
-		//// Printing the list.
-		//foreach (var items in main_anime_series)
-		//{
-		//	_test_output.WriteLine(items);
-		//}
-
-
 		List<string> keywords_filtration = new List<string> { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "second", "third", "season", ":", "recap", "!!" };
 		var main_list = FilterMainAnime(main_anime_series, keywords_filtration);
 
@@ -164,6 +163,11 @@ public class TestMALActorScrape : IDisposable
 			_test_output.WriteLine(main_list[i]);			
 		}
 	}
+
+	/*
+		Tasks: 
+		- Anime names that contains a number. Ex: 5-toubun no Hanayome. Need to exclude that from filtration of anime. -> Use title character count. If number's position is towards lower floor half, disregard.
+	 */
 
 	// Grabs only the main series for the anime and return it back to the SingleAnimeFranchise().
 	public List<string> FilterMainAnime(List<string> anime_list, List<string> keywords)
@@ -195,12 +199,43 @@ public class TestMALActorScrape : IDisposable
 		{
 			if (anime.ToLower().Contains(keyword.ToLower()))
 			{
+				// Use title character count. If number's position is towards lower floor half, disregard.
+				// Pass in found keyword to function.
+
 				return true;
 			}
 		}
 
 		return false;
 	}
+
+	public bool LocateNumPosition(string anime_name, string target_keywords)
+	{
+		// Middle of the string
+		char[] title_char_array = anime_name.ToCharArray();
+
+		var left_char_array = title_char_array.Take((title_char_array.Length + 1) / 2).ToArray();
+		var right_char_array = title_char_array.Skip(title_char_array.Length / 2).ToArray();
+
+		char key = Convert.ToChar(target_keywords);
+
+		/*
+		- Divide the anime title by 2 to get the middle. 
+		- if target_keyword is in left side of the split string, dont filter out. 
+		 */
+
+		bool char_contains = left_char_array.Contains(key);
+
+		// Indicates keyword is part of the anime title.
+		if (char_contains)
+		{
+			return true;
+		}
+
+		// Indicates keyword will most likely be part of a series anime.
+		return false;
+	}
+
 
 	public void Dispose()
 	{
