@@ -10,28 +10,33 @@ namespace Api_Enhanced.Controllers;
 [ApiController]
 public class ActorController : Controller
 {
-	private readonly MALActor _actor;
+	private readonly MALActor _mal_actor = new MALActor();
 
-    public ActorController(MALActor actor)
+	// Controller should not inject models, only services.
+    public ActorController()
     {
-        _actor = actor;
     }
 
-    // Endpoint: api/people/<name>
-    // Sort result by most favorited characters -> display anime name + character's name together.
-    [HttpGet("{name}")]
-	public async Task<ActionResult<Actor>> GetPeopleRoles(string name)
-    {
-        if (string.IsNullOrEmpty(name))
-            return BadRequest("Actor name is required");
+	/*
+     Tanezaki, Atsumi
+	Hanazawa, Kana
+     */
 
-        Actor actor = await _actor.FetchPeopleInfo(name);
+	// Endpoint: api/people/<name>
+	// Sort result by most favorited characters -> display anime name + character's name together.
+	[HttpGet("{name}")]
+	public async Task<ActionResult<List<string>>> GetPeopleRoles(string name)
+	{
+		if (string.IsNullOrEmpty(name))
+			return BadRequest("Actor name is required");
 
-        if (actor == null)
-        {
-            return NotFound("Actor/ Actress not found.");
-        }
+		var fetch_info_result = await _mal_actor.FetchPeopleInfo(name);
 
-        return Ok(actor);
+		if (fetch_info_result == null)
+		{
+			return NotFound("Actor/ Actress not found.");
+		}
+
+		return Ok(fetch_info_result);
 	}
 }

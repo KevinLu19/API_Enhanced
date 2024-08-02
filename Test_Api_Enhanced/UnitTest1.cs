@@ -1,31 +1,32 @@
-﻿using Api_Enhanced.Services;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
-using Xunit.Abstractions;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Security.AccessControl;
-using System.ComponentModel;
+using System.Text;
+using System.Threading.Tasks;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium;
+using Xunit.Abstractions;
+using OpenQA.Selenium.Firefox;
 
 namespace Test_Api_Enhanced;
 
 public class TestMALActorScrape : IDisposable
 {
-	private WebDriver _driver;
-	private string _website = "https://myanimelist.net/people.php";
+	private IWebDriver _driver;
+	// private string _website = "https://myanimelist.net/people.php";
 	private readonly ITestOutputHelper _test_output;
 	private Dictionary<IWebElement, IWebElement> _anime_character_map = new Dictionary<IWebElement, IWebElement>();
-
+	// private string _driver_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
+	
 	public TestMALActorScrape(ITestOutputHelper output)
     {
-		_driver = new ChromeDriver();
-		_driver.Navigate().GoToUrl(_website);
-
 		_test_output = output;
-    }
+
+		var fire_fox_service = FirefoxDriverService.CreateDefaultService();
+
+		_driver = new FirefoxDriver(fire_fox_service);
+		// driver.Navigate().GoToUrl(_website);
+	}
 
 	//   [Fact]
 	//public void VerifyWebsite()
@@ -62,8 +63,6 @@ public class TestMALActorScrape : IDisposable
 		//var lastname = "kana";
 		var firstname = "atsumi";
 		var lastname = "tanezaki";
-		
-
 
 		var url = $"https://myanimelist.net/people.php?cat=person&q={lastname}%{firstname}";
 
@@ -98,7 +97,6 @@ public class TestMALActorScrape : IDisposable
 	public void ResultTable()
 	{
 		var anime_title = "js-people-title";			// <div class = {anime_title}>
-		var character_name = "spaceit_pad";
 		var anime_tv_series = "spaceit_pad anime-info-text";		// <div class = {anime_tv_series}>
 
 		// Need to store the results in a hash table. The key would be anime titles, value would be character name.
@@ -239,6 +237,8 @@ public class TestMALActorScrape : IDisposable
 
 	public void Dispose()
 	{
+		Thread.Sleep(5000);
+
 		_driver.Quit();
 	}
 }

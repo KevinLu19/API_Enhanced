@@ -13,6 +13,7 @@ public static class Program
 
 		// Add services to the container.
 
+		// Attribute Routing is in line 17.
 		builder.Services.AddControllers();
 		builder.Services.AddHttpClient<MyAnimeListService>();
 		builder.Services.AddTransient<MALActor>();
@@ -37,6 +38,7 @@ public static class Program
 
 		app.UseAuthorization();
 
+		// Map controllers to routes.
 		app.MapControllers();
 
 		app.Run();
