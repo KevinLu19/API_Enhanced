@@ -12,11 +12,12 @@ public static class Program
 		var builder = WebApplication.CreateBuilder(args);
 
 		// Add services to the container.
+		builder.Services.AddControllers();
 
 		// Attribute Routing is in line 17.
-		builder.Services.AddControllers();
 		builder.Services.AddHttpClient<MyAnimeListService>();
-		builder.Services.AddTransient<MALActor>();
+		// builder.Services.AddTransient<MALActor>();
+		builder.Services.AddTransient<IMALActor, MALActor>();
 
 		builder.Services.AddSingleton(provider =>
 			new MyAnimeListService(provider.GetRequiredService<HttpClient>()));
@@ -45,6 +46,5 @@ public static class Program
 
 	}
 
-	
 }
   

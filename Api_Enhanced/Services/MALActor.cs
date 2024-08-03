@@ -5,7 +5,13 @@ using OpenQA.Selenium.Firefox;
 
 namespace Api_Enhanced.Services;
 
-public class MALActor
+// Interface for MALActor
+public interface IMALActor
+{
+	Task<List<string>> FetchPeopleInfo(string name);
+}
+
+public class MALActor : IMALActor
 {
 	// People's website on MAL.
 	private string _website = "https://myanimelist.net/people.php";
@@ -91,6 +97,7 @@ public class MALActor
 		var sorted_by_most_recent = _driver.FindElement(By.XPath("//span[@id='js-people-character-sort-title']"));
 		sorted_by_most_recent.Click();
 
+		// Sort the listed animes from actor / actress by most favorite by members.
 		try
 		{
 			var favorites = _driver.FindElement(By.XPath("//span[@id='people-va-popularity']"));
@@ -108,8 +115,10 @@ public class MALActor
 	// Result from actor / actress page after Selenium.
 	public void ResultTable()
 	{
-		var anime_title = "js-people-title";            // <div class = {anime_title}>
+		var anime_title = "js-people-title";						// <div class = {anime_title}>
 		var anime_tv_series = "spaceit_pad anime-info-text";        // <div class = {anime_tv_series}>
+
+		// Filter out the non TV series animes such omitting OVA, Movies, Specials etc. Still have TV special however.
 
 		var title = _driver.FindElements(By.XPath($"//a[@class='{anime_title}']"));
 		var tv_series = _driver.FindElements(By.XPath($"//div[@class='{anime_tv_series}']"));

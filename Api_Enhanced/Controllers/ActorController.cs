@@ -12,11 +12,6 @@ public class ActorController : Controller
 {
 	private readonly MALActor _mal_actor = new MALActor();
 
-	// Controller should not inject models, only services.
-    public ActorController()
-    {
-    }
-
 	/*
      Tanezaki, Atsumi
 	Hanazawa, Kana
@@ -32,7 +27,7 @@ public class ActorController : Controller
 
 		var fetch_info_result = await _mal_actor.FetchPeopleInfo(name);
 
-		if (fetch_info_result == null)
+		if (fetch_info_result == null || fetch_info_result.Count == 0)
 		{
 			return NotFound("Actor/ Actress not found.");
 		}
