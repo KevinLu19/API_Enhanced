@@ -400,3 +400,5 @@ FodyWeavers.xsd
 # Remove Test Debug
 Test_Api_Enhanced/bin/*
 bin/Debug/*
+
+Test_Api_Enhanced/TestSelenium.cs

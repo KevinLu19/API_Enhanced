@@ -27,6 +27,7 @@ public class AnimeController : Controller
         _anime_service = anime_service;
     }
 
+    // Endpoint: api/anime/{id}
     [HttpGet("{anime_id}")]
     public async Task<ActionResult<Anime>> GetAnimeById(int anime_id)
     {
@@ -42,5 +43,25 @@ public class AnimeController : Controller
         }
     }
 
-    
+    // Endpoint: api/anime/{id}/review
+    [HttpGet("{anime_id}/reviews")]
+    public async Task<ActionResult<Anime>> GetAnimeReview(int anime_id)
+    {
+        MALAnimeScrape anime_scrape = new MALAnimeScrape();
+
+        try
+        {
+			var anime_review = await anime_scrape.GetReview(anime_id);
+
+            return Ok(anime_review);
+		}
+        catch (HttpRequestException e) 
+        {
+            return StatusCode(500, e.Message);
+        }
+	}
+
+
+    // Endpoint: api/anime/current_season
+
 }

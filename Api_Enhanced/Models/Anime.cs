@@ -8,6 +8,7 @@ public class Anime
 	public List<string>? Genre { get; set; }
 	public List<string>? Studios { get; set; }
 	public string? MainPicture { get; set; }
-	public double Score { get; set; }				// MAL Api Uses Mean as its score.
+	public double Score { get; set; }               // MAL Api Uses Mean as its score.
 
+	public List<string> Review { get; set; }				// For GetAnimeReview get request.
 }

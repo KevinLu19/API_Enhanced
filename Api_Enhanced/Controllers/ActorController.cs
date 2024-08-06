@@ -13,8 +13,9 @@ public class ActorController : Controller
 	private readonly MALActor _mal_actor = new MALActor();
 
 	/*
+	 Example actress names for testing:
      Tanezaki, Atsumi
-	Hanazawa, Kana
+	 Hanazawa, Kana
      */
 
 	// Endpoint: api/people/<name>

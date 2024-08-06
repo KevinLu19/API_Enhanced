@@ -5,6 +5,10 @@ using OpenQA.Selenium.Firefox;
 
 namespace Api_Enhanced.Services;
 
+/*
+ Web scrape for actor/actress from MyanimeList website.
+ */
+
 // Interface for MALActor
 public interface IMALActor
 {
@@ -27,47 +31,6 @@ public class MALActor : IMALActor
 		_driver = new FirefoxDriver(firefox_default_service);
 	}
 
-	//  public async Task<Actor> FetchPeopleInfo(string name)
-	//  {
-	//      //var options = new ChromeOptions();
-	//      //options.AddArgument("--headless");      // Headless mode.
-
-	//// Navigate to chrome.exe
-	//_driver = new ChromeDriver(_driver_path);
-	//_driver.Navigate().GoToUrl(_website);
-
-	//// Locate search box and input name.
-	//IWebElement search_box = _driver.FindElement(By.XPath("//input[@name='q']"));
-	//search_box.SendKeys(name);
-	//search_box.Submit();
-
-	//      // Wait for result to load.
-	//      var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-	//      wait.Until(d => d.FindElement(By.XPath("//table[contains(@class, 'people-list')]/tbody/tr/td/div/a")));
-
-	//var people_list = _driver.FindElements(By.XPath("//table[contains(@class, 'people-list')]/tbody/tr/td/div/a"));
-
-	//      Actor actor = new Actor();
-
-	//      foreach (var person in people_list)
-	//      {
-	//          actor.Name = person.Text;
-	//          actor.Url = person.GetAttribute("href");
-	//          Console.WriteLine($"Name: {actor.Name} - url: {actor.Url}");
-	//      }
-
-	//      // Entered name should be Lastname Firstname. Split on the space in between.
-	//      var name_split = name.Split(" ");
-	//      var last_name = name_split[0];
-	//      var first_name = name_split[1];
-
-	//      // Search by link.
-	//      var complete_weebsite = $"{_website}?cat=person&q={last_name}%{first_name}";
-
-	//      return actor;
-	//  }
-
-	// Need to return Actor class since controller uses it.
 	public async Task<List<string>> FetchPeopleInfo(string name)
 	{
 		// Entered name should be Lastname Firstname. Split on the space in between.
