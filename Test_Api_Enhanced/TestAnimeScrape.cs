@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,6 +45,50 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		{
 			_test_output.WriteLine(item.Text);
             _test_output.WriteLine("-------------");
+		}
+	}
+
+    [Fact]
+    public void CurrentSeason()
+    {
+		var url = "https://myanimelist.net/anime/season";
+
+		// Limit to size 15 from myanimelist website sorted by score and grab the first 15 animes.
+		List<string> list_current_anime = new List<string>();
+		List<string> limit_list_size = new List<string>();
+
+		_driver.Navigate().GoToUrl(url);
+		Thread.Sleep(2000);
+
+		// Find TV button
+		var tv_btn = _driver.FindElement(By.XPath("//li[@class='btn-type js-btn-seasonal']"));
+
+		if (tv_btn.Text == "TV")
+		{
+			tv_btn.Click();
+
+			// Try to click on sort button
+			try
+			{
+				var anime_title = _driver.FindElements(By.XPath("//h2[@class='h2_anime_title']"));
+
+				foreach (var title in anime_title)
+				{
+					list_current_anime.Add(title.Text);
+				}
+
+				// Limit the size down to 15 for list using LINQ.
+				limit_list_size = list_current_anime.Take(15).ToList();
+				
+				foreach (var item in limit_list_size)
+				{
+					_test_output.WriteLine(item);
+				}
+			}
+			catch (Exception ex)
+			{
+				_test_output.WriteLine(ex.Message);
+			}
 		}
 	}
 

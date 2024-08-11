@@ -21,10 +21,12 @@ namespace Api_Enhanced.Controllers;
 public class AnimeController : Controller
 {
 	private readonly MyAnimeListService _anime_service;
+    private readonly IMALAnimeScrape _anime_scrape;
 
-    public AnimeController(MyAnimeListService anime_service)
+    public AnimeController(MyAnimeListService anime_service, IMALAnimeScrape anime_scrape)
     {
         _anime_service = anime_service;
+        _anime_scrape = anime_scrape;
     }
 
     // Endpoint: api/anime/{id}
@@ -47,11 +49,9 @@ public class AnimeController : Controller
     [HttpGet("{anime_id}/reviews")]
     public async Task<ActionResult<Anime>> GetAnimeReview(int anime_id)
     {
-        MALAnimeScrape anime_scrape = new MALAnimeScrape();
-
         try
         {
-			var anime_review = await anime_scrape.GetReview(anime_id);
+			var anime_review = await _anime_scrape.GetReview(anime_id);
 
             return Ok(anime_review);
 		}
@@ -63,5 +63,18 @@ public class AnimeController : Controller
 
 
     // Endpoint: api/anime/current_season
+    [HttpGet("current_season")]
+    public async Task<ActionResult<List<string>>> CurrentSeason()
+    {
+        try
+        {
+            var current_animes = await _anime_scrape.CurrentSeason();
 
+            return Ok(current_animes);
+        }
+        catch (HttpRequestException e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }
