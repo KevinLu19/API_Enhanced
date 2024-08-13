@@ -29,6 +29,9 @@ public class MALActor : IMALActor
 		var firefox_default_service = FirefoxDriverService.CreateDefaultService();
 
 		_driver = new FirefoxDriver(firefox_default_service);
+
+		var firefox_options = new FirefoxOptions();
+		firefox_options.AddArgument("headless");
 	}
 
 	public async Task<List<string>> FetchPeopleInfo(string name)

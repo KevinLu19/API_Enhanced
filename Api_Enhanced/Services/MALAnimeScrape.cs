@@ -1,7 +1,6 @@
 ﻿using Api_Enhanced.Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
-using System.Runtime;
 
 namespace Api_Enhanced.Services;
 
@@ -25,6 +24,9 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		var firefox_default_service = FirefoxDriverService.CreateDefaultService();
 
 		_driver = new FirefoxDriver(firefox_default_service);
+
+		var firefox_options = new FirefoxOptions();
+		firefox_options.AddArgument("headless");
 	}
 
 	// For api/anime/{id}/review
