@@ -24,6 +24,9 @@ public class MALActor : IMALActor
 	private Dictionary<IWebElement, IWebElement> _anime_character_map = new Dictionary<IWebElement, IWebElement>();
 	private List<string> _main_anime_list = new List<string>();
 
+	// Saving actor name from GetPeopleRoles() function from Actor Controller in order to populate the popularity function.
+	private string _save_actor_name;
+
 	public MALActor()
 	{
 		var firefox_default_service = FirefoxDriverService.CreateDefaultService();
@@ -34,6 +37,7 @@ public class MALActor : IMALActor
 		firefox_options.AddArgument("headless");
 	}
 
+	// Endpoint: api/people/<name>
 	public async Task<List<string>> FetchPeopleInfo(string name)
 	{
 		// Entered name should be Lastname Firstname. Split on the space in between.
@@ -48,7 +52,9 @@ public class MALActor : IMALActor
 
 		// SortByMostFavorite();
 		GetAllMainAnimes();         // End result will get all of the main anime.
-		
+
+		_save_actor_name = name;	// Saving name for api/people/popularity function. 
+
 		return _main_anime_list;
 	}
 
@@ -172,4 +178,8 @@ public class MALActor : IMALActor
 
 		return false;
 	}
+
+
+	// api/people/popularitiy
+	
 }

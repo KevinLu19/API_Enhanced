@@ -97,6 +97,9 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		return limit_list_size;
 	}
 
+	// For api/anime/top_anime
+
+
 	public void Dispose()
 	{
 		Thread.Sleep(2000);

@@ -35,4 +35,12 @@ public class ActorController : Controller
 
 		return Ok(fetch_info_result);
 	}
+
+	// Endpoint: api/people/id
+	// retervies detailed information about a specific actor/actress by ID. Information includes but not limited to bio, career highlight,etc.
+
+	// Endpoint: api/people/popularitiy 
+	// Provides metrics on the actor/actress’s popularity, such as the number of followers, mentions, or search trends. Another metric could be member favorites on MAL
+		
+
 }
