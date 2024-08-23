@@ -9,9 +9,16 @@ using MySql.Data.MySqlClient;
 using Xunit.Abstractions;
 
 namespace Test_Api_Enhanced;
-public class TestDb
+
+// Interface for loading data
+public interface IDataInsert
+{ 
+	public void Select();
+}
+
+public class TestDb : IDataInsert
 {
-    private MySqlConnection _connection = new();
+    private MySqlConnection _connection;
 
 	private string _conn_string;
     private ITestOutputHelper _output;
@@ -20,16 +27,15 @@ public class TestDb
     {
         _output = output;
 
-		string username = Environment.GetEnvironmentVariable("DATABASE_USERNAME");
-		string password = Environment.GetEnvironmentVariable("DATABASE_PASSWORD");
+		string? username = Environment.GetEnvironmentVariable("DATABASE_USERNAME");
+		string? password = Environment.GetEnvironmentVariable("DATABASE_PASSWORD");
 
-		_output.WriteLine($"database username is {username} ");
-		_output.WriteLine($"database password is: {password}");
+		//_output.WriteLine($"database username is {username} ");
+		//_output.WriteLine($"database password is: {password}");
 
 		_conn_string = $"server=localhost;user={username};database=api_enhanced;port=3306;password={password}";
 
-		MySqlConnection conn = new(_conn_string);
-		_connection = conn;
+		_connection = new(_conn_string);
     }
 
     [Fact]
@@ -51,19 +57,87 @@ public class TestDb
 
 			var create_table_command = new MySqlCommand(create_table, _connection);
 
-			if (create_table_command != null)
-			{
-				create_table_command.ExecuteNonQuery();
-				_output.WriteLine("Successfully created VoiceActors table");
-			}
-			else
-			{
-				_output.WriteLine("Either table is already created or something happned.");
-			}
+			create_table_command.ExecuteNonQuery();
 		}
 		catch (Exception ex)
 		{
 			_output.WriteLine(ex.Message);
 		}
+	}
+
+	[Fact]
+	public void Update() { }
+
+	[Fact]
+	public void Delete()
+	{
+
+	}
+
+	[Fact]
+
+	// Function taken from data inserter interface.
+	public void Select()
+	{
+		try
+		{
+			_connection.Open();
+			_output.WriteLine("Connection opened from Select() function. Will try and print data");
+
+			var command = _connection.CreateCommand();
+
+			command.CommandText = "SELECT * FROM voiceactors";
+
+			var reader = command.ExecuteReader();
+
+			while(reader.Read()) 
+			{
+				var id = reader.GetInt32(0);
+				var last_name = reader.GetString(1);
+				var first_name = reader.GetString(2);
+				var popularity = reader.GetInt32(3);
+
+				_output.WriteLine($"ActorID: {id}, last_name: {last_name}, first_name: {first_name}, popularity: {popularity}");
+			}			
+
+			_connection.Close();
+		}
+		catch (Exception e)
+		{
+			_output.WriteLine(e.Message);
+		}
+	}
+
+	[Fact]
+	public void Insert()
+	{
+		// Open connection 
+		try
+		{
+			_connection.Open();
+
+			_output.WriteLine("Connection opened from Insert() function. Will try and insert data.");
+
+			// Insert dummy data
+			var command = _connection.CreateCommand();
+
+			command.CommandText = @"
+            INSERT INTO voiceactors (last_name, first_name, popularity) VALUES 
+            ('takahashi', 'rei', 58716),
+            ('itou', 'miku', 6069),
+            ('kitou', 'akari', 10087);
+			";
+
+			command.ExecuteNonQuery();	
+
+			_output.WriteLine("Inserted dummy data into the database table");
+
+			_connection.Close();
+		}
+		catch (Exception e)
+		{
+			_output.WriteLine(e.Message);
+		}
+		
 	}
 }
