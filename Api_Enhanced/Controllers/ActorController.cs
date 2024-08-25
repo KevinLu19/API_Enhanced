@@ -41,6 +41,17 @@ public class ActorController : Controller
 
 	// Endpoint: api/people/popularitiy 
 	// Provides metrics on the actor/actress’s popularity, such as the number of followers, mentions, or search trends. Another metric could be member favorites on MAL
-		
+	[HttpGet("{name}/popularity")]
+	public async Task<ActionResult<List<string>>> GetActorPopularity(string name)
+	{
+		if (string.IsNullOrEmpty(name))
+			return BadRequest("Actor name is required.");
 
+		var popularity_string = await _mal_actor.GetActorPopularity(name);
+
+		if (popularity_string == null)
+			return NotFound("Popularity does not exist/ something went wrong.");
+
+		return Ok(popularity_string);
+	}
 }

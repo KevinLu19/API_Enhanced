@@ -1,6 +1,7 @@
 ﻿using Api_Enhanced.Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
+using System.Xml.Linq;
 
 
 namespace Api_Enhanced.Services;
@@ -15,12 +16,17 @@ public interface IMALActor
 	Task<List<string>> FetchPeopleInfo(string name);
 }
 
+public interface IDatabase
+{
+	void DatabaseConnection();
+}
+
 public class MALActor : IMALActor
 {
 	// People's website on MAL.
 	private string _website = "https://myanimelist.net/people.php";
 	private IWebDriver? _driver;
-	private string _driver_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
+	//private string _driver_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
 	private Dictionary<IWebElement, IWebElement> _anime_character_map = new Dictionary<IWebElement, IWebElement>();
 	private List<string> _main_anime_list = new List<string>();
 
@@ -181,5 +187,23 @@ public class MALActor : IMALActor
 
 
 	// api/people/popularitiy
-	
+	public async Task<string> GetActorPopularity(string name)
+	{
+		// Entered name should be Lastname Firstname. Split on the space in between.
+		var name_split = name.Split(" ");
+		var last_name = name_split[0];
+		var first_name = name_split[1];
+
+		// Search by Link.
+		var complete_website = $"{_website}?cat=person&q={last_name}%{first_name}";
+
+		_driver.Navigate().GoToUrl(complete_website);
+
+		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']"));
+
+		var favorites = fav[3].Text;
+		
+
+		return favorites;
+	}
 }

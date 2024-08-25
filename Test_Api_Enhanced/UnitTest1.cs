@@ -234,6 +234,24 @@ public class TestMALActorScrape : IDisposable
 		return false;
 	}
 
+	[Fact]
+	// for api/people/popularity
+	public void GetActorPopularity()
+	{
+		var actress = "https://myanimelist.net/people/34785/Rie_Takahashi?q=takahashi&cat=person";
+		_driver.Navigate().GoToUrl(actress);
+		
+		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']"));
+
+		// 4th item in the list will display Member Favorites: <number>. Will return back a string.
+		_test_output.WriteLine(fav[3].Text);
+
+		//if (fav.Text == "Member Favorites:")
+		//	_test_output.WriteLine(fav.Text);
+		//else
+		//	_test_output.WriteLine("Spaceit_pad but not what I'm looking for");
+
+	}
 
 	public void Dispose()
 	{
