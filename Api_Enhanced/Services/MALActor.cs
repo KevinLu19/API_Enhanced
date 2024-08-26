@@ -1,4 +1,5 @@
 ﻿using Api_Enhanced.Models;
+using MySql.Data.MySqlClient;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using System.Xml.Linq;
@@ -18,10 +19,10 @@ public interface IMALActor
 
 public interface IDatabase
 {
-	void DatabaseConnection();
+	MySqlConnection DatabaseConnection();
 }
 
-public class MALActor : IMALActor
+public class MALActor : IMALActor, IDatabase
 {
 	// People's website on MAL.
 	private string _website = "https://myanimelist.net/people.php";
@@ -202,8 +203,90 @@ public class MALActor : IMALActor
 		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']"));
 
 		var favorites = fav[3].Text;
-		
+		var remove_comma = favorites.Replace(",", "");
+
+		var split_string = remove_comma.Split(":");
+
+		var popularity_to_int = Int32.Parse(split_string[1].Trim());
+
+		// Add to database.
+		var conn = DatabaseConnection();
+
+		try
+		{
+			conn.Open();
+			InsertToDatabase(conn, last_name, first_name, popularity_to_int);
+		}
+		catch (Exception ex)
+		{
+            await Console.Out.WriteLineAsync(ex.Message);
+        }
 
 		return favorites;
+	}
+
+	private void InsertToDatabase(MySqlConnection conn ,string lastname, string firstname, int popularity)
+	{
+		var insert_string_query = @"INSERT INTO member_popularity (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
+		ON DUPLICATE KEY UPDATE last_name = VALUES(last_name), first_name = VALUES(first_name);";
+
+		MySqlCommand cmd = new MySqlCommand(insert_string_query, conn);
+
+		// Add parameters to avoid SQL injection.
+		cmd.Parameters.AddWithValue("@lastname", lastname);
+		cmd.Parameters.AddWithValue("@firstname", firstname);
+		cmd.Parameters.AddWithValue("@popularity", popularity);
+
+		try
+		{
+			cmd.ExecuteNonQuery();
+			Console.WriteLine("Successfully inserted into table.");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+		finally
+		{
+			conn.Close();
+            Console.WriteLine("Closing database on inserttodatabase() function.");
+        }
+    }
+
+	// From Idatabase interface.
+	public MySqlConnection DatabaseConnection()
+	{
+		MySqlConnection connection;
+
+		string? username = Environment.GetEnvironmentVariable("DATABASE_USERNAME");
+		string? password = Environment.GetEnvironmentVariable("DATABASE_PASSWORD");
+
+		string conn_string = $"server=localhost;user={username};database=api_enhanced;port=3306;password={password}";
+
+		connection = new MySqlConnection(conn_string);
+
+		try
+		{
+			connection.Open();
+
+			// Create table if it doesn't already exists.
+			string create_table_query = @"CREATE TABLE IF NOT EXISTS member_popularity 
+			(
+				ActorID INT AUTO_INCREMENT PRIMARY KEY,
+				last_name VARCHAR(50),
+				first_name VARCHAR(50),
+				popularity INT
+			)";
+
+			var create_table_cmd = new MySqlCommand(create_table_query, connection);
+
+			create_table_cmd.ExecuteNonQuery();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+
+		return connection;
 	}
 }

@@ -7,17 +7,24 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using Xunit.Abstractions;
 using OpenQA.Selenium.Firefox;
+using MySql.Data.MySqlClient;
 
 namespace Test_Api_Enhanced;
 
-public class TestMALActorScrape : IDisposable
+public interface IDatabase
+{
+	MySqlConnection DatabaseConnection();
+	void Insert(MySqlConnection conn, string last_name, string first_name, int popularity);
+}
+
+public class TestMALActorScrape : IDisposable, IDatabase
 {
 	private IWebDriver _driver;
 	// private string _website = "https://myanimelist.net/people.php";
 	private readonly ITestOutputHelper _test_output;
 	private Dictionary<IWebElement, IWebElement> _anime_character_map = new Dictionary<IWebElement, IWebElement>();
 	// private string _driver_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "drivers");
-	
+
 	public TestMALActorScrape(ITestOutputHelper output)
     {
 		_test_output = output;
@@ -238,19 +245,79 @@ public class TestMALActorScrape : IDisposable
 	// for api/people/popularity
 	public void GetActorPopularity()
 	{
-		var actress = "https://myanimelist.net/people/34785/Rie_Takahashi?q=takahashi&cat=person";
-		_driver.Navigate().GoToUrl(actress);
+		//var actress = "https://myanimelist.net/people/34785/Rie_Takahashi?q=takahashi&cat=person";
+
+		string last_name = "tanezaki";
+		string first_name = "atsumi";
+
+		string complete_url = $"https://myanimelist.net/people.php?cat=person&q={last_name}%{first_name}";
+
+		_driver.Navigate().GoToUrl(complete_url);
 		
 		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']"));
 
 		// 4th item in the list will display Member Favorites: <number>. Will return back a string.
 		_test_output.WriteLine(fav[3].Text);
 
-		//if (fav.Text == "Member Favorites:")
-		//	_test_output.WriteLine(fav.Text);
-		//else
-		//	_test_output.WriteLine("Spaceit_pad but not what I'm looking for");
+		// Get the number value of fav[3] and convert into int.
+		var string_fav = fav[3].Text;
+		var remove_comma = string_fav.Replace(",", "");
 
+		var split_string = remove_comma.Split(":");
+		
+		var popularity_to_int = Int32.Parse(split_string[1].Trim());
+	
+		// _test_output.WriteLine(popularity_to_int.ToString());
+
+		// Add popularity to voiceactor table on the database.
+		var conn = DatabaseConnection();
+
+		try
+		{
+			conn.Open();
+			_test_output.WriteLine("Connection to the database.");
+
+			Insert(conn, last_name, first_name, popularity_to_int);
+		}
+		catch (Exception ex)
+		{
+			_test_output.WriteLine(ex.Message);
+		}
+	}
+
+	// From IDatabase Interface.
+	public MySqlConnection DatabaseConnection()
+	{
+		MySqlConnection connection;
+		string? username = Environment.GetEnvironmentVariable("DATABASE_USERNAME");
+		string? password = Environment.GetEnvironmentVariable("DATABASE_PASSWORD");
+
+		string conn_string = $"server=localhost;user={username};database=api_enhanced;port=3306;password={password}";
+
+		connection = new MySqlConnection(conn_string);
+
+		return connection;
+	}
+
+	// From IDatabase Insert() Interface.
+	public void Insert(MySqlConnection conn ,string last_name, string first_name, int popularity)
+	{
+		var insert_string_query = @"INSERT INTO voiceactors (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
+		ON DUPLICATE KEY UPDATE last_name = VALUES(last_name), first_name = VALUES(first_name);";
+
+		MySqlCommand cmd = new MySqlCommand(insert_string_query, conn);
+
+		// Add Parameters.
+		cmd.Parameters.AddWithValue("@lastname", last_name);
+		cmd.Parameters.AddWithValue("@firstname", first_name);
+		cmd.Parameters.AddWithValue("@popularity", popularity);
+
+		cmd.ExecuteNonQuery();
+
+		_test_output.WriteLine("Added values to voiceactor table.");
+
+		_test_output.WriteLine("Closing database");
+		conn.Close();
 	}
 
 	public void Dispose()

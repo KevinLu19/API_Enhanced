@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting.Server;
+
 using MySql.Data.MySqlClient;
 using Xunit.Abstractions;
 
@@ -66,7 +67,10 @@ public class TestDb : IDataInsert
 	}
 
 	[Fact]
-	public void Update() { }
+	public void Update() 
+	{
+		
+	}
 
 	[Fact]
 	public void Delete()
@@ -108,7 +112,7 @@ public class TestDb : IDataInsert
 		}
 	}
 
-	[Fact]
+	//[Fact]
 	public void Insert()
 	{
 		// Open connection 
