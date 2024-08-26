@@ -210,51 +210,67 @@ public class MALActor : IMALActor, IDatabase
 		var popularity_to_int = Int32.Parse(split_string[1].Trim());
 
 		// Add to database.
-		var conn = DatabaseConnection();
+		//var conn = DatabaseConnection();
 
-		try
+		using (var conn = DatabaseConnection())
 		{
-			conn.Open();
-			InsertToDatabase(conn, last_name, first_name, popularity_to_int);
+			if (conn.State != System.Data.ConnectionState.Open)
+				conn.Open();
+
+			try
+			{
+				InsertToDatabase(conn, last_name, first_name, popularity_to_int);
+			}
+			catch (Exception ex)
+			{
+				await Console.Out.WriteLineAsync(ex.Message);
+			}
+			finally
+			{
+				conn.Close();
+			}
 		}
-		catch (Exception ex)
-		{
-            await Console.Out.WriteLineAsync(ex.Message);
-        }
 
 		return favorites;
 	}
 
 	private void InsertToDatabase(MySqlConnection conn ,string lastname, string firstname, int popularity)
 	{
-		var insert_string_query = @"INSERT INTO member_popularity (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
-		ON DUPLICATE KEY UPDATE last_name = VALUES(last_name), first_name = VALUES(first_name);";
+		var insert_string_query = @"INSERT INTO popularity (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
+		ON DUPLICATE KEY UPDATE popularity = VALUES(popularity);";
 
-		MySqlCommand cmd = new MySqlCommand(insert_string_query, conn);
-
-		// Add parameters to avoid SQL injection.
-		cmd.Parameters.AddWithValue("@lastname", lastname);
-		cmd.Parameters.AddWithValue("@firstname", firstname);
-		cmd.Parameters.AddWithValue("@popularity", popularity);
-
-		try
+		using (MySqlCommand cmd = new MySqlCommand(insert_string_query, conn))
 		{
-			cmd.ExecuteNonQuery();
-			Console.WriteLine("Successfully inserted into table.");
+			// Add parameters to avoid SQL injection.
+			cmd.Parameters.AddWithValue("@lastname", lastname);
+			cmd.Parameters.AddWithValue("@firstname", firstname);
+			cmd.Parameters.AddWithValue("@popularity", popularity);
+
+			try
+			{
+				if (conn.State != System.Data.ConnectionState.Open)
+					conn.Open();
+
+				var change_in_rows = cmd.ExecuteNonQuery();
+
+				if (change_in_rows > 0)
+					Console.WriteLine("Inserted data or updated popularity on a row.");
+				else
+					Console.WriteLine("No row(s) were affected");
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+			}
+			finally
+			{
+				conn.Close();
+			}
 		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.Message);
-		}
-		finally
-		{
-			conn.Close();
-            Console.WriteLine("Closing database on inserttodatabase() function.");
-        }
-    }
+	}
 
-	// From Idatabase interface.
-	public MySqlConnection DatabaseConnection()
+		// From Idatabase interface.
+		public MySqlConnection DatabaseConnection()
 	{
 		MySqlConnection connection;
 
@@ -270,12 +286,13 @@ public class MALActor : IMALActor, IDatabase
 			connection.Open();
 
 			// Create table if it doesn't already exists.
-			string create_table_query = @"CREATE TABLE IF NOT EXISTS member_popularity 
+			string create_table_query = @"CREATE TABLE IF NOT EXISTS popularity 
 			(
 				ActorID INT AUTO_INCREMENT PRIMARY KEY,
 				last_name VARCHAR(50),
 				first_name VARCHAR(50),
-				popularity INT
+				popularity INT,
+				UNIQUE (last_name, first_name)
 			)";
 
 			var create_table_cmd = new MySqlCommand(create_table_query, connection);
