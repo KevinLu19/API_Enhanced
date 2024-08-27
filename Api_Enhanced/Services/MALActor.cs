@@ -31,9 +31,6 @@ public class MALActor : IMALActor, IDatabase
 	private Dictionary<IWebElement, IWebElement> _anime_character_map = new Dictionary<IWebElement, IWebElement>();
 	private List<string> _main_anime_list = new List<string>();
 
-	// Saving actor name from GetPeopleRoles() function from Actor Controller in order to populate the popularity function.
-	private string _save_actor_name;
-
 	public MALActor()
 	{
 		var firefox_default_service = FirefoxDriverService.CreateDefaultService();
@@ -59,8 +56,6 @@ public class MALActor : IMALActor, IDatabase
 
 		// SortByMostFavorite();
 		GetAllMainAnimes();         // End result will get all of the main anime.
-
-		_save_actor_name = name;	// Saving name for api/people/popularity function. 
 
 		return _main_anime_list;
 	}
@@ -163,7 +158,6 @@ public class MALActor : IMALActor, IDatabase
 					_main_anime_list.Add(item);				// Add to List<string> from private access modifier.
 				}
 			}
-
 		}
 
 		return _main_anime_list;
@@ -200,7 +194,8 @@ public class MALActor : IMALActor, IDatabase
 
 		_driver.Navigate().GoToUrl(complete_website);
 
-		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']"));
+		// Only obtain 4 items from findelements. Discard the rest.
+		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']")).Take(4).ToList();
 
 		var favorites = fav[3].Text;
 		var remove_comma = favorites.Replace(",", "");
@@ -270,7 +265,7 @@ public class MALActor : IMALActor, IDatabase
 	}
 
 		// From Idatabase interface.
-		public MySqlConnection DatabaseConnection()
+public MySqlConnection DatabaseConnection()
 	{
 		MySqlConnection connection;
 

@@ -8,6 +8,7 @@ using OpenQA.Selenium;
 using Xunit.Abstractions;
 using OpenQA.Selenium.Firefox;
 using MySql.Data.MySqlClient;
+using System.Xml.Linq;
 
 namespace Test_Api_Enhanced;
 
@@ -17,7 +18,12 @@ public interface IDatabase
 	void Insert(MySqlConnection conn, string last_name, string first_name, int popularity);
 }
 
-public class TestMALActorScrape : IDisposable, IDatabase
+public interface IActorNames
+{
+	string SupplyActorNames();
+}
+
+public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 {
 	private IWebDriver _driver;
 	// private string _website = "https://myanimelist.net/people.php";
@@ -241,20 +247,51 @@ public class TestMALActorScrape : IDisposable, IDatabase
 		return false;
 	}
 
+	// From IActorName interface
+	public string SupplyActorNames()
+	{
+		List<string> actor_lastname = new List<string> { "tanezaki", "han", "iwami", "fujita", "hanazawa" };
+		List<string> actor_firstname = new List<string> { "atsumi",  "megumi", "manaka", "saki", "kana" };
+
+		// Choose a random name from list.
+		Random r = new Random();
+		int r_int = r.Next(0, actor_lastname.Count);
+
+		List<string> lastname_firstname = new List<string>();
+
+		// Zip 2 lists together
+		lastname_firstname = actor_lastname.Zip(actor_firstname, (x, y) => x + " " + y).ToList();
+
+		return lastname_firstname[r_int];
+	}
+
 	[Fact]
 	// for api/people/popularity
 	public void GetActorPopularity()
 	{
 		//var actress = "https://myanimelist.net/people/34785/Rie_Takahashi?q=takahashi&cat=person";
 
-		string last_name = "tanezaki";
-		string first_name = "atsumi";
+		//string last_name = "tanezaki";
+		//string first_name = "atsumi";
+
+		// Get random actor name supplied by the interface.
+		var actor_names = SupplyActorNames();
+
+		var name_split = actor_names.Split(" ");
+		var last_name = name_split[0];
+		var first_name = name_split[1];
 
 		string complete_url = $"https://myanimelist.net/people.php?cat=person&q={last_name}%{first_name}";
 
 		_driver.Navigate().GoToUrl(complete_url);
 		
-		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']"));
+		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']")).Take(4).ToList();
+
+		//// Print items in list
+		//foreach (var item in fav)
+		//{
+		//	_test_output.WriteLine(item.Text);
+  //      }
 
 		// 4th item in the list will display Member Favorites: <number>. Will return back a string.
 		_test_output.WriteLine(fav[3].Text);
@@ -295,6 +332,29 @@ public class TestMALActorScrape : IDisposable, IDatabase
 		string conn_string = $"server=localhost;user={username};database=api_enhanced;port=3306;password={password}";
 
 		connection = new MySqlConnection(conn_string);
+
+		try
+		{
+			connection.Open();
+
+			// Create table if it doesn't already exists.
+			string create_table_query = @"CREATE TABLE IF NOT EXISTS test_voiceactors 
+			(
+				ActorID INT AUTO_INCREMENT PRIMARY KEY,
+				last_name VARCHAR(50),
+				first_name VARCHAR(50),
+				popularity INT,
+				UNIQUE (last_name, first_name)
+			)";
+
+			var create_table_cmd = new MySqlCommand(create_table_query, connection);
+
+			create_table_cmd.ExecuteNonQuery();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
 
 		return connection;
 	}
