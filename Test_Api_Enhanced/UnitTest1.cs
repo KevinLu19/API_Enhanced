@@ -301,9 +301,6 @@ public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 		// Only get the value
 		var value = fav.Text.Replace("Member Favorites:", "").Trim();
 
-		//_test_output.WriteLine(value);
-
-		 
 
 		// Add popularity to voiceactor table on the database.
 		var conn = DatabaseConnection();
