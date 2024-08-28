@@ -195,14 +195,10 @@ public class MALActor : IMALActor, IDatabase
 		_driver.Navigate().GoToUrl(complete_website);
 
 		// Only obtain 4 items from findelements. Discard the rest.
-		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']")).Take(4).ToList();
+		var fav = _driver.FindElement(By.XPath("//div[span[text()='Member Favorites:']]"));
 
-		var favorites = fav[3].Text;
-		var remove_comma = favorites.Replace(",", "");
-
-		var split_string = remove_comma.Split(":");
-
-		var popularity_to_int = Int32.Parse(split_string[1].Trim());
+		// Only get the value
+		var value = fav.Text.Replace("Member Favorites:", "").Trim();
 
 		// Add to database.
 		//var conn = DatabaseConnection();
@@ -214,7 +210,7 @@ public class MALActor : IMALActor, IDatabase
 
 			try
 			{
-				InsertToDatabase(conn, last_name, first_name, popularity_to_int);
+				InsertToDatabase(conn, last_name, first_name, value);
 			}
 			catch (Exception ex)
 			{
@@ -226,10 +222,10 @@ public class MALActor : IMALActor, IDatabase
 			}
 		}
 
-		return favorites;
+		return value;
 	}
 
-	private void InsertToDatabase(MySqlConnection conn ,string lastname, string firstname, int popularity)
+	private void InsertToDatabase(MySqlConnection conn ,string lastname, string firstname, string popularity)
 	{
 		var insert_string_query = @"INSERT INTO popularity (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
 		ON DUPLICATE KEY UPDATE popularity = VALUES(popularity);";
@@ -286,7 +282,7 @@ public MySqlConnection DatabaseConnection()
 				ActorID INT AUTO_INCREMENT PRIMARY KEY,
 				last_name VARCHAR(50),
 				first_name VARCHAR(50),
-				popularity INT,
+				popularity VARCHAR(100),
 				UNIQUE (last_name, first_name)
 			)";
 

@@ -9,13 +9,14 @@ using Xunit.Abstractions;
 using OpenQA.Selenium.Firefox;
 using MySql.Data.MySqlClient;
 using System.Xml.Linq;
+using OpenQA.Selenium.Support.UI;
 
 namespace Test_Api_Enhanced;
 
 public interface IDatabase
 {
 	MySqlConnection DatabaseConnection();
-	void Insert(MySqlConnection conn, string last_name, string first_name, int popularity);
+	void Insert(MySqlConnection conn, string last_name, string first_name, string popularity);
 }
 
 public interface IActorNames
@@ -38,7 +39,9 @@ public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 		var fire_fox_service = FirefoxDriverService.CreateDefaultService();
 
 		_driver = new FirefoxDriver(fire_fox_service);
-		// driver.Navigate().GoToUrl(_website);
+
+		var firefox_options = new FirefoxOptions();
+		firefox_options.AddArgument("headless");
 	}
 
 	//   [Fact]
@@ -284,42 +287,46 @@ public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 		string complete_url = $"https://myanimelist.net/people.php?cat=person&q={last_name}%{first_name}";
 
 		_driver.Navigate().GoToUrl(complete_url);
-		
-		var fav = _driver.FindElements(By.XPath("//td/div[@class='spaceit_pad']")).Take(4).ToList();
 
-		//// Print items in list
-		//foreach (var item in fav)
-		//{
-		//	_test_output.WriteLine(item.Text);
-  //      }
+		// Adding a wait to ensure the page loads completely
+		WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
 
-		// 4th item in the list will display Member Favorites: <number>. Will return back a string.
-		_test_output.WriteLine(fav[3].Text);
+		// Locate Member Function: <number>
+		// //div[span[text()='Member Favorites:']] find the exact html and grabs the entire div node.
+		var fav = _driver.FindElement(By.XPath("//div[span[text()='Member Favorites:']]"));
 
-		// Get the number value of fav[3] and convert into int.
-		var string_fav = fav[3].Text;
-		var remove_comma = string_fav.Replace(",", "");
+		// Gets Member Function: <number>
+		//_test_output.WriteLine(fav.Text);
 
-		var split_string = remove_comma.Split(":");
-		
-		var popularity_to_int = Int32.Parse(split_string[1].Trim());
-	
-		// _test_output.WriteLine(popularity_to_int.ToString());
+		// Only get the value
+		var value = fav.Text.Replace("Member Favorites:", "").Trim();
+
+		//_test_output.WriteLine(value);
+
+		 
 
 		// Add popularity to voiceactor table on the database.
 		var conn = DatabaseConnection();
 
-		try
+		using (conn = DatabaseConnection())
 		{
-			conn.Open();
-			_test_output.WriteLine("Connection to the database.");
+			if (conn.State != System.Data.ConnectionState.Open)
+				conn.Open();
 
-			Insert(conn, last_name, first_name, popularity_to_int);
+			try
+			{
+				Insert(conn, last_name, first_name, value);
+			}
+			catch (Exception ex)
+			{
+				_test_output.WriteLine(ex.Message);
+			}
+			finally
+			{
+				conn.Close();
+			}
 		}
-		catch (Exception ex)
-		{
-			_test_output.WriteLine(ex.Message);
-		}
+
 	}
 
 	// From IDatabase Interface.
@@ -343,7 +350,7 @@ public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 				ActorID INT AUTO_INCREMENT PRIMARY KEY,
 				last_name VARCHAR(50),
 				first_name VARCHAR(50),
-				popularity INT,
+				popularity VARCHAR(100),
 				UNIQUE (last_name, first_name)
 			)";
 
@@ -360,9 +367,9 @@ public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 	}
 
 	// From IDatabase Insert() Interface.
-	public void Insert(MySqlConnection conn ,string last_name, string first_name, int popularity)
+	public void Insert(MySqlConnection conn ,string last_name, string first_name, string popularity)
 	{
-		var insert_string_query = @"INSERT INTO voiceactors (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
+		var insert_string_query = @"INSERT INTO test_voiceactors (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
 		ON DUPLICATE KEY UPDATE last_name = VALUES(last_name), first_name = VALUES(first_name);";
 
 		MySqlCommand cmd = new MySqlCommand(insert_string_query, conn);
@@ -374,10 +381,26 @@ public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 
 		cmd.ExecuteNonQuery();
 
-		_test_output.WriteLine("Added values to voiceactor table.");
+		try
+		{
+			if (conn.State != System.Data.ConnectionState.Open)
+				conn.Open();
 
-		_test_output.WriteLine("Closing database");
-		conn.Close();
+			var change_in_rows = cmd.ExecuteNonQuery();
+
+			if (change_in_rows > 0)
+				Console.WriteLine("Inserted data or updated popularity on a row.");
+			else
+				Console.WriteLine("No row(s) were affected");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+		finally
+		{
+			conn.Close();
+		}
 	}
 
 	public void Dispose()
