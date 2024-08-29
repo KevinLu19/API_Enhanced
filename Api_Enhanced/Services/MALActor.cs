@@ -38,7 +38,7 @@ public class MALActor : IMALActor, IDatabase
 		_driver = new FirefoxDriver(firefox_default_service);
 
 		var firefox_options = new FirefoxOptions();
-		firefox_options.AddArgument("headless");
+		firefox_options.AddArgument("--headless");
 	}
 
 	// Endpoint: api/people/<name>
