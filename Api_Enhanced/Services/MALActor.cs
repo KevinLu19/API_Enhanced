@@ -33,12 +33,12 @@ public class MALActor : IMALActor, IDatabase
 
 	public MALActor()
 	{
+		var firefox_options = new FirefoxOptions();
+		firefox_options.AddArgument("-headless");
+
 		var firefox_default_service = FirefoxDriverService.CreateDefaultService();
 
 		_driver = new FirefoxDriver(firefox_default_service);
-
-		var firefox_options = new FirefoxOptions();
-		firefox_options.AddArgument("--headless");
 	}
 
 	// Endpoint: api/people/<name>
@@ -189,10 +189,19 @@ public class MALActor : IMALActor, IDatabase
 		var last_name = name_split[0];
 		var first_name = name_split[1];
 
-		// Search by Link.
-		var complete_website = $"{_website}?cat=person&q={last_name}%{first_name}";
+		try
+		{
+			// Search by Link.
+			var complete_website = $"{_website}?cat=person&q={last_name}%{first_name}";
 
-		_driver.Navigate().GoToUrl(complete_website);
+			_driver.Navigate().GoToUrl(complete_website);
+		}
+		catch (Exception e) 
+		{
+			Console.WriteLine(e.Message);
+			Console.WriteLine("Cannot find actress/actor");
+		}
+		
 
 		// Only obtain 4 items from findelements. Discard the rest.
 		var fav = _driver.FindElement(By.XPath("//div[span[text()='Member Favorites:']]"));
@@ -277,7 +286,7 @@ public MySqlConnection DatabaseConnection()
 			connection.Open();
 
 			// Create table if it doesn't already exists.
-			string create_table_query = @"CREATE TABLE IF NOT EXISTS popularity 
+			string create_table_query = @"CREATE TABLE IF NOT EXISTS actress_popularity 
 			(
 				ActorID INT AUTO_INCREMENT PRIMARY KEY,
 				last_name VARCHAR(50),
