@@ -38,7 +38,7 @@ public class MALActor : IMALActor, IDatabase
 
 		var firefox_default_service = FirefoxDriverService.CreateDefaultService();
 
-		_driver = new FirefoxDriver(firefox_default_service);
+		_driver = new FirefoxDriver(firefox_default_service, firefox_options);
 	}
 
 	// Endpoint: api/people/<name>
@@ -189,6 +189,7 @@ public class MALActor : IMALActor, IDatabase
 		var last_name = name_split[0];
 		var first_name = name_split[1];
 
+		// Try and use actor name for url.
 		try
 		{
 			// Search by Link.
@@ -203,15 +204,12 @@ public class MALActor : IMALActor, IDatabase
 		}
 		
 
-		// Only obtain 4 items from findelements. Discard the rest.
 		var fav = _driver.FindElement(By.XPath("//div[span[text()='Member Favorites:']]"));
 
 		// Only get the value
 		var value = fav.Text.Replace("Member Favorites:", "").Trim();
 
 		// Add to database.
-		//var conn = DatabaseConnection();
-
 		using (var conn = DatabaseConnection())
 		{
 			if (conn.State != System.Data.ConnectionState.Open)
@@ -236,7 +234,7 @@ public class MALActor : IMALActor, IDatabase
 
 	private void InsertToDatabase(MySqlConnection conn ,string lastname, string firstname, string popularity)
 	{
-		var insert_string_query = @"INSERT INTO popularity (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
+		var insert_string_query = @"INSERT INTO actress_popularity (last_name, first_name, popularity) VALUES (@lastname, @firstname, @popularity) 
 		ON DUPLICATE KEY UPDATE popularity = VALUES(popularity);";
 
 		using (MySqlCommand cmd = new MySqlCommand(insert_string_query, conn))
