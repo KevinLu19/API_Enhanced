@@ -21,12 +21,12 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 
 	public MALAnimeScrape()
     {
+		var firefox_options = new FirefoxOptions();
+		firefox_options.AddArgument("-headless");
+
 		var firefox_default_service = FirefoxDriverService.CreateDefaultService();
 
-		_driver = new FirefoxDriver(firefox_default_service);
-
-		var firefox_options = new FirefoxOptions();
-		firefox_options.AddArgument("headless");
+		_driver = new FirefoxDriver(firefox_default_service, firefox_options);
 	}
 
 	// For api/anime/{id}/review
