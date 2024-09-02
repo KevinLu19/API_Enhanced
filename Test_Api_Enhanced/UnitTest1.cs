@@ -39,9 +39,6 @@ public class TestMALActorScrape : IDisposable, IDatabase, IActorNames
 		var fire_fox_service = FirefoxDriverService.CreateDefaultService();
 
 		_driver = new FirefoxDriver(fire_fox_service);
-
-		var firefox_options = new FirefoxOptions();
-		firefox_options.AddArgument("headless");
 	}
 
 	//   [Fact]

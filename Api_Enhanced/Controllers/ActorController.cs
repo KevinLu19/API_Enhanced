@@ -12,12 +12,6 @@ public class ActorController : Controller
 {
 	private readonly MALActor _mal_actor = new MALActor();
 
-	/*
-	 Example actress names for testing:
-     Tanezaki, Atsumi
-	 Hanazawa, Kana
-     */
-
 	// Endpoint: api/people/<name>
 	// Sort result by most favorited characters -> display anime name + character's name together.
 	[HttpGet("{name}")]

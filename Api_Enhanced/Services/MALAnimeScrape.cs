@@ -29,7 +29,7 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		_driver = new FirefoxDriver(firefox_default_service, firefox_options);
 	}
 
-	// For api/anime/{id}/review
+	// Endpoint: api/anime/{id}/review
 	public async Task<Anime> GetReview(int anime_id)
 	{
 		// Review: <div class = 'review-element js-review-element'>
@@ -56,7 +56,7 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 	}
 
 
-	// For api/anime/current season
+	// Endpoint: api/anime/current season
 	public async Task<List<string>> CurrentSeason()
 	{
 		var url = "https://myanimelist.net/anime/season";
@@ -99,6 +99,7 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 
 	// For api/anime/top_anime
 
+	// Endpoint: api/anime/news
 
 	public void Dispose()
 	{

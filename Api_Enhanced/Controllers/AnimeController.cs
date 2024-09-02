@@ -77,4 +77,14 @@ public class AnimeController : Controller
             return StatusCode(500, e.Message);
         }
     }
+
+    // Endpoint: api/anime/news
+    [HttpGet("news")]
+    public async Task<ActionResult<string>> AnimeNews()
+    {
+        return "";
+    }
+
+
+    // Endpoint: api/anime/studio/{studio}
 }

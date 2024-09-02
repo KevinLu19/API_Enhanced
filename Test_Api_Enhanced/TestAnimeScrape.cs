@@ -92,7 +92,50 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		}
 	}
 
-    public void Dispose()
+	// Endpoint: api/anime/news
+	[Fact]
+	public void TestGetAnimeNews()
+	{
+		string news_url = "https://www.animenewsnetwork.com/";
+
+		_driver.Navigate().GoToUrl(news_url);
+
+		// Select filter if not already selected. Filter for news, anime, manga
+		var anime_topic = _driver.FindElement(By.XPath("//span[text()='Anime']"));
+		var manga_topic = _driver.FindElement(By.XPath("//span[text()='Manga']"));
+		var news_topic = _driver.FindElement(By.XPath("//span/span[text()='News']"));
+
+		var selected_class = _driver.FindElement(By.XPath("//span[@class='selected']"));
+
+		try
+		{
+			anime_topic.Click();
+			manga_topic.Click();
+			news_topic.Click();
+
+			_test_output.WriteLine("Clicked on all 3 options.");
+
+			GetNewsPerDay();
+		}
+		catch (Exception ex)
+		{
+			_test_output.WriteLine(ex.Message);
+		}
+	}
+
+	public void GetNewsPerDay()
+	{
+		Dictionary<string, string> news_feed = new Dictionary<string, string>();
+
+		var news_day = _driver.FindElements(By.XPath("//div[@class='mainfeed-day']")).ToList();
+
+		foreach (var item in news_day)
+		{
+			_test_output.WriteLine(item.Text);
+		}
+	}
+
+	public void Dispose()
     {
         Thread.Sleep(2000);
         _driver.Quit();
