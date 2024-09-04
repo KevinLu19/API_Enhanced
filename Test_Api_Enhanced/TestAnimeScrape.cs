@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
+using System.Text.RegularExpressions;
 
 namespace Test_Api_Enhanced;
 public class TestAnimeScrape : IWebScrape, IDisposable
@@ -129,9 +130,43 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 
 		var news_day = _driver.FindElements(By.XPath("//div[@class='mainfeed-day']")).ToList();
 
+		List<string> string_news_day = new List<string>();
+
+		// Convert IWebElement to a list of strings.
 		foreach (var item in news_day)
 		{
-			_test_output.WriteLine(item.Text);
+			string_news_day.Add(item.Text.ToString());
+		}
+
+		// Print list<string> converted from above.	
+		//foreach (var item in string_news_day)
+		//{
+		//	item.Replace("NEWS", "");
+		//}
+
+		CleanTheList(string_news_day);
+	}
+
+	public void CleanTheList(List<string> old_list)
+	{
+		// define pattern to match
+		string pattern = @"\bNEWS\b|\b\d+ comments\b|\b\d{1,3}:\d{2}\b|\b[a-z]+ \b";
+
+		// Clean the list of strings
+		List<string> cleaned_list = new List<string>();
+
+		foreach (var text in old_list)
+		{
+			// replace matched patterns with empty string.
+			string clean_text = Regex.Replace(text, pattern, "").Trim();
+
+			cleaned_list.Add(clean_text);
+		}
+
+		// print
+		foreach (string item in cleaned_list)
+		{
+			_test_output.WriteLine(item);
 		}
 	}
 
