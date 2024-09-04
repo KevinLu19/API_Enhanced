@@ -1,6 +1,7 @@
 ﻿using Api_Enhanced.Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
+using System.Text.RegularExpressions;
 
 namespace Api_Enhanced.Services;
 
@@ -8,6 +9,7 @@ public interface IMALAnimeScrape
 {
 	Task<Anime> GetReview(int anime_id);
 	Task<List<string>> CurrentSeason();
+	Task<List<string>> GetAnimeNews();
 }
 
 /*
@@ -100,6 +102,71 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 	// For api/anime/top_anime
 
 	// Endpoint: api/anime/news
+	public async Task<List<string>> GetAnimeNews()
+	{
+		string news_url = "https://www.animenewsnetwork.com/";
+
+		_driver.Navigate().GoToUrl(news_url);
+
+		// Select filter if not already selected. Filter for news, anime, manga
+		var anime_topic = _driver.FindElement(By.XPath("//span[text()='Anime']"));
+		var manga_topic = _driver.FindElement(By.XPath("//span[text()='Manga']"));
+		var news_topic = _driver.FindElement(By.XPath("//span/span[text()='News']"));
+
+		var selected_class = _driver.FindElement(By.XPath("//span[@class='selected']"));
+
+		try
+		{
+			anime_topic.Click();
+			manga_topic.Click();
+			news_topic.Click();
+
+			Console.WriteLine("Clicked on all 3 options.");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+
+		List<string> result = GetNewsPerDay();
+
+		return result;
+	}
+
+	public List<string> GetNewsPerDay()
+	{
+		var news_day = _driver.FindElements(By.XPath("//div[@class='mainfeed-day']")).ToList();
+
+		List<string> string_news_day = new List<string>();
+
+		// Convert IWebElement to a list of strings.
+		foreach (var item in news_day)
+		{
+			string_news_day.Add(item.Text.ToString());
+		}
+
+		return CleanTheList(string_news_day);
+	}
+
+	public List<string> CleanTheList(List<string> old_list)
+	{
+		// define pattern to match
+		string pattern = @"\bNEWS\b|\b\d+ comments\b|\b\d{1,2}:\d{2}\b|\b[a-z]+ \b|\b\d+ comment\b";
+
+		// Clean the list of strings
+		List<string> cleaned_list = new List<string>();
+
+		foreach (var text in old_list)
+		{
+			// replace matched patterns with empty string.
+			string clean_text = Regex.Replace(text, pattern, "").Trim();
+
+			cleaned_list.Add(clean_text);
+		}
+
+
+		return cleaned_list;
+	}
 
 	public void Dispose()
 	{

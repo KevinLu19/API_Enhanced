@@ -80,9 +80,18 @@ public class AnimeController : Controller
 
     // Endpoint: api/anime/news
     [HttpGet("news")]
-    public async Task<ActionResult<string>> AnimeNews()
+    public async Task<ActionResult<List<string>>> AnimeNews()
     {
-        return "";
+        try
+        {
+            var news = await _anime_scrape.GetAnimeNews();
+
+            return Ok(news);
+        }
+        catch (HttpRequestException e)
+        {
+            return StatusCode(500, e.Message);
+        }
     }
 
 

@@ -115,16 +115,20 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 			news_topic.Click();
 
 			_test_output.WriteLine("Clicked on all 3 options.");
-
-			GetNewsPerDay();
 		}
 		catch (Exception ex)
 		{
 			_test_output.WriteLine(ex.Message);
 		}
+
+		//List<string> result = GetNewsPerDay();
+
+		//return result;
+
+		GetNewsPerDay();
 	}
 
-	public void GetNewsPerDay()
+	public List<string> GetNewsPerDay()
 	{
 		Dictionary<string, string> news_feed = new Dictionary<string, string>();
 
@@ -138,19 +142,13 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 			string_news_day.Add(item.Text.ToString());
 		}
 
-		// Print list<string> converted from above.	
-		//foreach (var item in string_news_day)
-		//{
-		//	item.Replace("NEWS", "");
-		//}
-
-		CleanTheList(string_news_day);
+		return CleanTheList(string_news_day);
 	}
 
-	public void CleanTheList(List<string> old_list)
+	public List<string> CleanTheList(List<string> old_list)
 	{
 		// define pattern to match
-		string pattern = @"\bNEWS\b|\b\d+ comments\b|\b\d{1,3}:\d{2}\b|\b[a-z]+ \b";
+		string pattern = @"\bNEWS\b|\b\d+ comments\b|\b\d{1,2}:\d{2}\b|\b[a-z]+ \b|\b\d+ comment\b";
 
 		// Clean the list of strings
 		List<string> cleaned_list = new List<string>();
@@ -166,8 +164,12 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		// print
 		foreach (string item in cleaned_list)
 		{
+			_test_output.WriteLine("----------");
 			_test_output.WriteLine(item);
+			_test_output.WriteLine("----------");
 		}
+
+		return cleaned_list;
 	}
 
 	public void Dispose()
