@@ -80,7 +80,7 @@ public class AnimeController : Controller
 
     // Endpoint: api/anime/news
     [HttpGet("news")]
-    public async Task<ActionResult<List<string>>> AnimeNews()
+    public async Task<ActionResult<List<Dictionary<string, string>>>> AnimeNews()
     {
         try
         {

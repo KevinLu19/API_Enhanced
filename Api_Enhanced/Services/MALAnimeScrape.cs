@@ -9,8 +9,9 @@ public interface IMALAnimeScrape
 {
 	Task<Anime> GetReview(int anime_id);
 	Task<List<string>> CurrentSeason();
-	Task<List<string>> GetAnimeNews();
+	Task<List<Dictionary<string, string>>> GetAnimeNews();
 }
+
 
 /*
  Scraping generalized items for the website for anime only.
@@ -102,7 +103,7 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 	// For api/anime/top_anime
 
 	// Endpoint: api/anime/news
-	public async Task<List<string>> GetAnimeNews()
+	public async Task<List<Dictionary<string, string>>> GetAnimeNews()
 	{
 		string news_url = "https://www.animenewsnetwork.com/";
 
@@ -121,19 +122,19 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 			manga_topic.Click();
 			news_topic.Click();
 
-			Console.WriteLine("Clicked on all 3 options.");
+			//Console.WriteLine("Clicked on all 3 options.");
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine(ex.Message);
 		}
 
-		List<string> result = GetNewsPerDay();
+		List<Dictionary<string, string>> result = GetNewsPerDay();
 
 		return result;
 	}
 
-	public List<string> GetNewsPerDay()
+	public List<Dictionary<string, string>> GetNewsPerDay()
 	{
 		var news_day = _driver.FindElements(By.XPath("//div[@class='mainfeed-day']")).ToList();
 
@@ -148,7 +149,7 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		return CleanTheList(string_news_day);
 	}
 
-	public List<string> CleanTheList(List<string> old_list)
+	public List<Dictionary<string,string>> CleanTheList(List<string> old_list)
 	{
 		// define pattern to match
 		string pattern = @"\bNEWS\b|\b\d+ comments\b|\b\d{1,2}:\d{2}\b|\b[a-z]+ \b|\b\d+ comment\b";
@@ -164,8 +165,50 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 			cleaned_list.Add(clean_text);
 		}
 
+		var readable_news = MakeListReadable(cleaned_list);
 
-		return cleaned_list;
+		return readable_news;
+	}
+
+	public List<Dictionary<string,string>> MakeListReadable(List<string> list)
+	{
+		List<Dictionary<string, string>> result = new List<Dictionary<string, string>>();
+
+		// String manipulation to obtain date, title, description.
+		foreach (var item in list)
+		{
+			// Split string by month and date.
+			// Skips the first element from the list.
+			// Works on any date in the month.
+			var sections = Regex.Split(item, @"(?=(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{1,2},)");
+
+
+			foreach (var section in sections)
+			{
+				// Split by newlines to get the title and description
+				var lines = section.Trim().Split("\n", StringSplitOptions.RemoveEmptyEntries);
+
+				// Ensures there are at least 2 lines for date and title.
+				if (lines.Length >= 2)
+				{
+					string date = lines[0].Trim();
+					string description = lines[1].Trim();
+
+					// Grab last non empty item.
+					string title = lines[^1];
+
+					// Store into dictionary.
+					result.Add(new Dictionary<string, string>
+					{
+						{ "Date", date},
+						{ "Title", title },
+						{"Description", description }
+					});
+				}
+			}
+		}
+
+		return result;
 	}
 
 	public void Dispose()

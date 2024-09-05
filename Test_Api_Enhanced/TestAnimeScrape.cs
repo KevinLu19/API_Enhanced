@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace Test_Api_Enhanced;
 public class TestAnimeScrape : IWebScrape, IDisposable
@@ -114,7 +115,7 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 			manga_topic.Click();
 			news_topic.Click();
 
-			_test_output.WriteLine("Clicked on all 3 options.");
+			// _test_output.WriteLine("Clicked on all 3 options.");
 		}
 		catch (Exception ex)
 		{
@@ -161,15 +162,63 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 			cleaned_list.Add(clean_text);
 		}
 
-		// print
-		foreach (string item in cleaned_list)
-		{
-			_test_output.WriteLine("----------");
-			_test_output.WriteLine(item);
-			_test_output.WriteLine("----------");
-		}
+		MakeListReadable(cleaned_list);
 
 		return cleaned_list;
+	}
+
+	public void MakeListReadable(List<string> cleaned_list)
+	{
+		List<Dictionary<string, string>> results = new List<Dictionary<string, string>>();
+
+		foreach (var item in cleaned_list)
+		{
+			// Split string by month and date.
+			var sections = Regex.Split(item, @"(?=Sep \d{1,2},)");
+
+			foreach (var section in sections)
+			{
+				var lines = section.Trim().Split("\n", StringSplitOptions.RemoveEmptyEntries);
+
+				// Print lines for debugging purposes
+				_test_output.WriteLine($"--- New Section ---\n{section}");
+				for (int i = 0; i < lines.Length; i++)
+				{
+					_test_output.WriteLine($"{i}: {lines[i]}");
+				}
+
+
+				if (lines.Length >= 2)
+				{
+					// Line[0] gives the date
+					string date = lines[0].Trim();
+					string description = lines[1].Trim();
+
+					// Title is at the end of the last non empty line.
+					string title = lines[^1].Trim();
+
+					// Store into dictionary
+					results.Add(new Dictionary<string, string>
+					{
+						{ "Date", date},
+						{ "Title", title},
+						{ "Description", description}
+					});
+				}
+
+				//_test_output.WriteLine(lines[1]);
+			}
+		}
+
+		//// Print items in List<dictionary<string,string>>
+		//foreach (var item in results)
+		//{
+		//	_test_output.WriteLine($"Date: {item["Date"]}");
+		//	_test_output.WriteLine($"Title: {item["Title"]}");
+		//	_test_output.WriteLine($"Description: {item["Description"]}");
+		//	_test_output.WriteLine(new string('-', 50));
+		//}
+
 	}
 
 	public void Dispose()
