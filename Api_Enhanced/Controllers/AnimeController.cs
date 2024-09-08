@@ -94,6 +94,9 @@ public class AnimeController : Controller
         }
     }
 
-
     // Endpoint: api/anime/studio/{studio}
+    public void AnimeStudio()
+    {
+        
+    }
 }
