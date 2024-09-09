@@ -1,6 +1,7 @@
 ﻿using Api_Enhanced.Models;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Support.UI;
 using System.Text.RegularExpressions;
 
 namespace Api_Enhanced.Services;
@@ -209,6 +210,38 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		}
 
 		return result;
+	}
+
+	// Endpoint: api/anime/studio
+	// Once loaded into the studio page, only grab 8 entries of the TV anime series tab. Don't want to get the entire catalog.
+	public void GetStudio(string studio_name)
+	{
+		EnterStudioFromUser(studio_name);
+	}
+
+	public void EnterStudioFromUser(string studio_name)
+	{
+		string studio_url = "https://myanimelist.net/company";
+		_driver.Navigate().GoToUrl(studio_url);
+
+		// Wait 2 seconds for page to load.
+		Thread.Sleep(2000);
+
+
+		IWebElement search_box = _driver.FindElement(By.XPath("//form[@class='di-ib']"));
+		search_box.Click();
+		search_box.SendKeys(studio_name);
+
+		// Navigate to entered studio from user.
+		IWebElement search_button = _driver.FindElement(By.XPath("//button[@class='inputButton']"));
+		search_button.Click();
+
+		// Wait 2 seconds for page to load.
+		Thread.Sleep(2000);
+
+		// Click on the entry
+		IWebElement entry = _driver.FindElement(By.XPath("//td[@class='borderClass']"));
+		entry.Click();
 	}
 
 	public void Dispose()

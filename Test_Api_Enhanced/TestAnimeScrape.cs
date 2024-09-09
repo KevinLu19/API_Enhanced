@@ -221,6 +221,47 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 
 	}
 
+	// For endpoint: api/anime/studio
+	[Theory]
+	[InlineData("Kyoto Animation")]
+	public void GetStudio(string studio_name)
+	{
+		try
+		{
+			EnterStudioFromUser(studio_name);
+
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e.Message);
+		}
+	}
+
+	public void EnterStudioFromUser(string studio_name)
+	{
+		string studio_url = "https://myanimelist.net/company";
+		_driver.Navigate().GoToUrl(studio_url);
+
+		// Wait 2 seconds for page to load.
+		Thread.Sleep(2000);
+
+
+		IWebElement search_box = _driver.FindElement(By.XPath("//form[@class='di-ib']"));
+		search_box.Click();
+		search_box.SendKeys(studio_name);
+
+		// Navigate to entered studio from user.
+		IWebElement search_button = _driver.FindElement(By.XPath("//button[@class='inputButton']"));
+		search_button.Click();
+
+		// Wait 2 seconds for page to load.
+		Thread.Sleep(2000);
+
+		// Click on the entry
+		IWebElement entry = _driver.FindElement(By.XPath("//td[@class='borderClass']"));
+		entry.Click();
+	}
+
 	public void Dispose()
     {
         Thread.Sleep(2000);

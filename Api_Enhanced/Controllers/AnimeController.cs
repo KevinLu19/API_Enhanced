@@ -95,8 +95,9 @@ public class AnimeController : Controller
     }
 
     // Endpoint: api/anime/studio/{studio}
-    public void AnimeStudio()
+    [HttpGet("{studio_name}")]
+    public void AnimeStudio(string studio_name)
     {
-        
+                
     }
 }
