@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Xunit.Abstractions;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components.Forms;
+using OpenQA.Selenium.Support.UI;
 
 namespace Test_Api_Enhanced;
 public class TestAnimeScrape : IWebScrape, IDisposable
@@ -222,10 +223,11 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 	}
 
 	// For endpoint: api/anime/studio
-	[Theory]
-	[InlineData("Kyoto Animation")]
-	public void GetStudio(string studio_name)
+	[Fact]
+	public void GetStudio()
 	{
+		string studio_name = "kyoto animation";
+
 		try
 		{
 			EnterStudioFromUser(studio_name);
@@ -242,24 +244,34 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		string studio_url = "https://myanimelist.net/company";
 		_driver.Navigate().GoToUrl(studio_url);
 
-		// Wait 2 seconds for page to load.
-		Thread.Sleep(2000);
+		// Wait 5 seconds for page to load.
+		Thread.Sleep(5000);
 
+		//IWebElement search_box = _driver.FindElement(By.XPath("//form[@class='di-ib']"));
+		IWebElement search_box = _driver.FindElement(By.XPath("//input[@type='text']"));
 
-		IWebElement search_box = _driver.FindElement(By.XPath("//form[@class='di-ib']"));
 		search_box.Click();
-		search_box.SendKeys(studio_name);
+		search_box.Clear();
+		search_box.SendKeys("kyoto animation");
+
+		_test_output.WriteLine($"Send {studio_name} into the search box");
 
 		// Navigate to entered studio from user.
 		IWebElement search_button = _driver.FindElement(By.XPath("//button[@class='inputButton']"));
 		search_button.Click();
 
-		// Wait 2 seconds for page to load.
-		Thread.Sleep(2000);
+		// Wait 5 seconds for page to load.
+		Thread.Sleep(5000);
 
 		// Click on the entry
 		IWebElement entry = _driver.FindElement(By.XPath("//td[@class='borderClass']"));
 		entry.Click();
+
+		Thread.Sleep(5000);
+
+		// Grab "All" tab, want to get a feel of the entered studio's upcoming and latest animes they've made.
+		IWebElement all_tab = _driver.FindElement(By.XPath("//li[@data-key='all']"));
+		all_tab.Click();
 	}
 
 	public void Dispose()
