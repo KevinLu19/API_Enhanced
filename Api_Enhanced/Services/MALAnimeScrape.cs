@@ -11,6 +11,7 @@ public interface IMALAnimeScrape
 	Task<Anime> GetReview(int anime_id);
 	Task<List<string>> CurrentSeason();
 	Task<List<Dictionary<string, string>>> GetAnimeNews();
+	Task<List<string>> GetStudio(string studio_name);
 }
 
 
@@ -214,17 +215,27 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 
 	// Endpoint: api/anime/studio
 	// Once loaded into the studio page, only grab 8 entries of the TV anime series tab. Don't want to get the entire catalog.
-	public void GetStudio(string studio_name)
+	public async Task<List<string>> GetStudio(string studio_name)
 	{
+		List<string> list_names_result = new List<string>();
+
 		try
 		{
 			EnterStudioFromUser(studio_name);
-			
+			List<string> results = FindAnimeNames();
+
+			foreach (var item in results)
+			{
+				list_names_result.Add(item);
+				Console.WriteLine();
+			}
 		}
 		catch (Exception e)
 		{
 			Console.WriteLine(e.Message);
 		}
+
+		return list_names_result;
 	}
 
 	public void EnterStudioFromUser(string studio_name)
@@ -258,6 +269,29 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		// Grab "All" tab, want to get a feel of the entered studio's upcoming and latest animes they've made.
 		IWebElement all_tab = _driver.FindElement(By.XPath("//li[@data-key='all']"));
 		all_tab.Click();
+
+		// Select "Newest" at the sorted tab.
+		IWebElement sort = _driver.FindElement(By.XPath("//span[@data-id='sort']"));
+		sort.Click();
+
+		Thread.Sleep(2000);
+
+		IWebElement newest = _driver.FindElement(By.XPath("//span[@id='start_date']"));
+		newest.Click();
+	}
+
+	public List<string> FindAnimeNames()
+	{
+		List<string> list_names = new List<string>();
+		var names = _driver.FindElements(By.XPath("//div/div[@class='title']"));
+
+		foreach (var items in names)
+		{
+			list_names.Add(items.Text);
+		}
+
+		// Only grab the first 8 entries in the list.
+		return list_names.Take(8).ToList();
 	}
 
 	public void Dispose()

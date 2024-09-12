@@ -231,7 +231,14 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		try
 		{
 			EnterStudioFromUser(studio_name);
+			
+			// returned list<string> results. have a size of 8.
+			var results = FindAnimeNames();
 
+			foreach (var item in results)
+			{
+				_test_output.WriteLine(item);
+			}
 		}
 		catch (Exception e)
 		{
@@ -239,6 +246,7 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		}
 	}
 
+	// Navigates to the studio page.
 	public void EnterStudioFromUser(string studio_name)
 	{
 		string studio_url = "https://myanimelist.net/company";
@@ -254,7 +262,7 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		search_box.Clear();
 		search_box.SendKeys("kyoto animation");
 
-		_test_output.WriteLine($"Send {studio_name} into the search box");
+		//_test_output.WriteLine($"Send {studio_name} into the search box");
 
 		// Navigate to entered studio from user.
 		IWebElement search_button = _driver.FindElement(By.XPath("//button[@class='inputButton']"));
@@ -272,6 +280,29 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		// Grab "All" tab, want to get a feel of the entered studio's upcoming and latest animes they've made.
 		IWebElement all_tab = _driver.FindElement(By.XPath("//li[@data-key='all']"));
 		all_tab.Click();
+
+		// Select "Newest" at the sorted tab.
+		IWebElement sort = _driver.FindElement(By.XPath("//span[@data-id='sort']"));
+		sort.Click();
+
+		Thread.Sleep(2000);
+
+		IWebElement newest = _driver.FindElement(By.XPath("//span[@id='start_date']"));
+		newest.Click();
+	}
+
+	public List<string> FindAnimeNames()
+	{
+		List<string> list_names = new List<string>();
+		var names = _driver.FindElements(By.XPath("//div/div[@class='title']"));
+		
+		foreach (var items in names)
+		{
+			list_names.Add(items.Text);
+		}
+
+		// Only grab the first 8 entries in the list.
+		return list_names.Take(8).ToList();
 	}
 
 	public void Dispose()

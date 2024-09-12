@@ -95,9 +95,18 @@ public class AnimeController : Controller
     }
 
     // Endpoint: api/anime/studio/{studio}
-    [HttpGet("{studio_name}")]
-    public void AnimeStudio(string studio_name)
+    [HttpGet("/studio/{studio_name}")]
+    public async Task<ActionResult<List<string>>> AnimeStudio(string studio_name)
     {
-                
+        try
+        {
+            var latest_studio_animes = await _anime_scrape.GetStudio(studio_name);
+
+            return Ok(latest_studio_animes);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
     }
 }
