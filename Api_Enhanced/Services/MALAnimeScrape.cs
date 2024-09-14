@@ -243,10 +243,10 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		string studio_url = "https://myanimelist.net/company";
 		_driver.Navigate().GoToUrl(studio_url);
 
+		
 		// Wait 5 seconds for page to load.
 		Thread.Sleep(5000);
 
-		//IWebElement search_box = _driver.FindElement(By.XPath("//form[@class='di-ib']"));
 		IWebElement search_box = _driver.FindElement(By.XPath("//input[@type='text']"));
 
 		search_box.Click();
@@ -274,10 +274,15 @@ public class MALAnimeScrape : IDisposable, IMALAnimeScrape
 		IWebElement sort = _driver.FindElement(By.XPath("//span[@data-id='sort']"));
 		sort.Click();
 
-		Thread.Sleep(2000);
+		WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+		//Thread.Sleep(2000);
 
-		IWebElement newest = _driver.FindElement(By.XPath("//span[@id='start_date']"));
-		newest.Click();
+		//IWebElement newest = _driver.FindElement(By.XPath("//span[@id='start_date']"));
+		//newest.Click();
+
+		var members = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//span[@id='members']")));
+
+		members.Click();
 	}
 
 	public List<string> FindAnimeNames()

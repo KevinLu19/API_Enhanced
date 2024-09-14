@@ -93,3 +93,4 @@ C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhance
 C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\bin\Debug\net8.0\runtimes\win-x64\native\krb5_64.dll
 C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\bin\Debug\net8.0\runtimes\win-x64\native\krbcc64.dll
 C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Windows.Extensions.dll
+C:\Users\Kevin\Desktop\Programming Project\CSharp\repos\Api_Enhanced\Api_Enhanced\bin\Debug\net8.0\SeleniumExtras.WaitHelpers.dll

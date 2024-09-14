@@ -20,8 +20,17 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 
 	public TestAnimeScrape(ITestOutputHelper output)
     {
-        var firefox_service = FirefoxDriverService.CreateDefaultService();
-        _driver = new FirefoxDriver(firefox_service);
+		// Test Headless mode.
+		var firefox_options = new FirefoxOptions();
+		firefox_options.AddArgument("-headless");
+
+		var firefox_service = FirefoxDriverService.CreateDefaultService();
+		
+		// Non headless mode - Default for testing.
+        //_driver = new FirefoxDriver(firefox_service);
+
+		// Testing headless mode.
+		_driver = new FirefoxDriver(firefox_service, firefox_options);
 
         _test_output = output;
     }
@@ -223,10 +232,12 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 	}
 
 	// For endpoint: api/anime/studio
-	[Fact]
-	public void GetStudio()
+	//[Fact]
+	[Theory]
+	[InlineData("kyoto animation")]
+	public void GetStudio(string studio_name)
 	{
-		string studio_name = "kyoto animation";
+		//string studio_name = "kyoto animation";
 
 		try
 		{
@@ -260,13 +271,15 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 
 		search_box.Click();
 		search_box.Clear();
-		search_box.SendKeys("kyoto animation");
+		search_box.SendKeys(studio_name);
 
-		//_test_output.WriteLine($"Send {studio_name} into the search box");
+		_test_output.WriteLine($"Send {studio_name} into the search box");
 
 		// Navigate to entered studio from user.
 		IWebElement search_button = _driver.FindElement(By.XPath("//button[@class='inputButton']"));
 		search_button.Click();
+
+		//_test_output.WriteLine("Navigated to entered studio from user.");
 
 		// Wait 5 seconds for page to load.
 		Thread.Sleep(5000);
@@ -275,20 +288,32 @@ public class TestAnimeScrape : IWebScrape, IDisposable
 		IWebElement entry = _driver.FindElement(By.XPath("//td[@class='borderClass']"));
 		entry.Click();
 
+		//_test_output.WriteLine("Clicked on the entry.");
+
 		Thread.Sleep(5000);
 
 		// Grab "All" tab, want to get a feel of the entered studio's upcoming and latest animes they've made.
 		IWebElement all_tab = _driver.FindElement(By.XPath("//li[@data-key='all']"));
 		all_tab.Click();
 
+		//_test_output.WriteLine("Clicked on the ALL Tab.");
+
 		// Select "Newest" at the sorted tab.
 		IWebElement sort = _driver.FindElement(By.XPath("//span[@data-id='sort']"));
 		sort.Click();
 
-		Thread.Sleep(2000);
+		//_test_output.WriteLine("Clicked on the sorted tab.");
 
-		IWebElement newest = _driver.FindElement(By.XPath("//span[@id='start_date']"));
+		WebDriverWait wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+		// Thread.Sleep(2000);
+
+		//var newest = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.XPath("//span[@id='start_date']")));
+		
+		IWebElement newest = _driver.FindElement(By.XPath("//span[@id='members']"));
 		newest.Click();
+
+		// _test_output.WriteLine("Clicked on the newest option under sorted.");
+
 	}
 
 	public List<string> FindAnimeNames()
